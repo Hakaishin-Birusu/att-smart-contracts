@@ -489,7 +489,7 @@ contract Master is Ownable {
         uint256 absoluteDeviationThreshold = targetRate.mul(deviationThreshold)
             .div(10 ** DECIMALS);
 
-        return (rate >= targetRate && rate.sub(targetRate) < absoluteDeviationThreshold)
+        return (rate >= targetRate )
             || (rate < targetRate && targetRate.sub(rate) < absoluteDeviationThreshold);
     }
     

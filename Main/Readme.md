@@ -2,6 +2,7 @@
 
 ## IMPORTANT
 1. Update addresses in smart contract to direct ATT
+    a. MarketOracle - "_wbnb" & "_busd"
 
 # Deployment 
 1. Deploy Att.sol

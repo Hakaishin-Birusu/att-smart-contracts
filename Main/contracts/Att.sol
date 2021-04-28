@@ -378,9 +378,7 @@ contract Att is ERC20Detailed, Ownable {
 
         if (supplyDelta < 0) {
             _totalSupply = _totalSupply.sub(uint256(supplyDelta.abs()));
-        } else {
-            _totalSupply = _totalSupply.add(uint256(supplyDelta));
-        }
+        } 
 
         if (_totalSupply > MAX_SUPPLY) {
             _totalSupply = MAX_SUPPLY;
