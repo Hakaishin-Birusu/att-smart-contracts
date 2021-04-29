@@ -2,54 +2,103 @@
 
 pragma solidity 0.6.12;
 
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+import "@openzeppelin/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-/**
- * @title : xSafe
- * @author : ProximusAlpha
- */
+contract xSafe is Ownable{
+    using SafeMath for uint256;
+    using SafeERC20 for IERC20;
 
-contract xSafe {
-    /// @dev Proxima Token instance
-    IERC20 public pxa;
-    /// @dev xProxima address
-    address public xProxima;
-    /// @dev Proxima Dev address
+    IERC20 public att;
+    IERC20 public xAtt;
     address public devAddr;
+    address public attPool;
+    uint256 public kLast;
+    uint256 public attPerBlock;
 
-    /// @dev An event thats emitted when Pxa tokens are released.
-    event XNotification(uint256 releasedAmount, uint256 blockNumber);
+    event Release(address indexed pool, uint256 releasedAmount, uint256 blockNumber);
+    event EmergencyWithdraw(address indexed user, uint256 amount);
 
-    /// @dev Initilizes PXA and dev
-    constructor(IERC20 _pxa) public {
-        pxa = _pxa;
-        devAddr = msg.sender;
+    constructor(IERC20 _att, IERC20 _xAtt, uint256 _attPerBlock, address _devAddr, address _attPool) public {
+        att = _att;
+        xAtt = _xAtt;
+        devAddr = _devAddr;
+        attPerBlock = _attPerBlock;
+        attPool = _attPool;
     }
 
-    /**
-     * @dev Releases Proxima token to xProxima.
-     * @param _amount : Amount of Pxa released.
-     */
-    function releaseX(uint256 _amount) external {
-        require(xProxima == msg.sender, "xSafe: Auth Failed");
-        if (_amount > balanceX()) {
-            _amount = balanceX();
+    function releaseRewards() external {
+        if (kLast != 0 && kLast < block.number) {
+            uint256 amount = block.number.sub(kLast).mul(attPerBlock);
+            _safeRelease(amount);
+            kLast = block.number;
         }
-        pxa.transfer(xProxima, _amount);
-        emit XNotification(_amount, block.number);
     }
 
-    /**
-     * @dev Sets xProxima.
-     * @param _xProxima :  xProxima Address.
-     */
-    function updateX(address _xProxima) external {
-        require(devAddr == msg.sender, "xSafe: Auth Failed");
-        xProxima = _xProxima;
+    // EMERGENCY ONLY.
+    function emergencyWithdraw(uint256 _amount) external onlyOwner {
+        att.safeTransfer(address(msg.sender), _amount);
+        emit EmergencyWithdraw(msg.sender, _amount);
     }
 
-    function balanceX() public view returns (uint256) {
-        return pxa.balanceOf(address(this));
+    function updateDev(address _devaddr) external onlyOwner {
+        devAddr = _devaddr;
+    }
+
+    function updateAttPool(address _attPool) external {
+        require(devAddr == msg.sender, "XSAFE: AUTH_FAILED");
+        attPool = _attPool;
+    }
+
+    function updateAttPerBlock(uint256 _attPerBlock) external {
+        require(devAddr == msg.sender, "XSAFE: AUTH_FAILED");
+        attPerBlock = _attPerBlock;
+    }
+
+    function _safeRelease(uint256 _amount) internal {
+        uint256 attBal = getSafeBalance();
+        if (_amount > attBal) {
+            att.safeTransfer(attPool, attBal);
+        } else {
+            att.safeTransfer(attPool, _amount);
+        }
+        emit Release(attPool, _amount, block.number);
+    }
+    
+    // View functions for frontend.
+    function getUserStat(address who)
+        external
+        view
+        returns (uint256 xBal, uint256 bal)
+    {    
+        xBal = xAtt.balanceOf(who);
+        (uint256 estimatedSupply,uint256 totalShares) = getEstimatedExchangeRate();
+        bal = xBal.mul(estimatedSupply).div(totalShares);
+    }
+
+    function getSafeBalance() public view returns(uint256){
+        return att.balanceOf(address(this));
+    }
+    
+    function getEstimatedExchangeRate() public view returns (uint256 estimatedSupply, uint256 totalShares) {
+        totalShares = xAtt.totalSupply();
+        uint256 attBal = getSafeBalance();
+        uint256 distribution = (block.number.sub(kLast)).mul(attPerBlock);
+        if (distribution > attBal) {
+            distribution = attBal;
+        }
+        estimatedSupply = att.balanceOf(attPool).add(distribution);
+    }
+
+    function toAtt(uint256 xAttAmount) external view returns (uint256 attAmount) {
+        (uint256 estimatedSupply,uint256 totalShares) = getEstimatedExchangeRate();
+        attAmount = (xAttAmount.mul(estimatedSupply)).div(totalShares);
+    }
+
+    function toXAtt(uint256 attAmount) external view returns (uint256 xAttAmount) {
+        (uint256 estimatedSupply,uint256 totalShares) = getEstimatedExchangeRate();
+        xAttAmount = (attAmount.mul(totalShares)).div(estimatedSupply);
     }
 }

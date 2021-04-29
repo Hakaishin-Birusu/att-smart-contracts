@@ -1,36 +1,7 @@
-/**
- *Submitted for verification at BscScan.com on 2021-03-18
-*/
-
 // SPDX-License-Identifier: MIT
-
-/*
-MIT License
-
-Copyright (c) 2020 DITTO Money
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-*/
 
 pragma solidity 0.6.12;
 
-// 
 /*
  * @dev Provides information about the current execution context, including the
  * sender of the transaction and its data. While these are generally available
@@ -878,54 +849,65 @@ contract TokenPool is Ownable {
     }
 }
 
-/* xDitto token with Governance.
+interface IxSafe {
+    function releaseRewards() external;
+}
 
-  xDitto is a non-rebasing BEP20 token that is swappable for DITTO at a variable rate.
-  Its purpose is to expand DITTO's reach and market cap without diluting DITTO's value.
-  Users can mint xDITTO by locking DITTO and redeem DITTO for xDITTO at any time.
-  xDITTO can be easily listed on CEXes like Binance.
+/* xAtt token with Governance.
+
+  xAtt is a non-rebasing BEP20 token that is swappable for ATT at a variable rate.
+  Its purpose is to expand ATT's reach and market cap without diluting ATT's value.
+  Users can mint xATT by locking ATT and redeem ATT for xATT at any time.
+  xATT can be easily listed on CEXes like Binance.
   It also allows for easier integration with staking and yield farming dapps.
 */
 
-contract xDitto is BEP20('xDitto', 'XDITTO') {
+contract xAtt is BEP20('xAtt', 'XATT') {
     
-    BEP20 ditto = BEP20(0x233d91A0713155003fc4DcE0AFa871b508B3B715);
-    TokenPool dittoPool;
-    
-    constructor() public {
-        dittoPool = new TokenPool(ditto);
+    BEP20 att = BEP20(0x233d91A0713155003fc4DcE0AFa871b508B3B715);
+    TokenPool attPool;
+    address public xSafe;
+
+    constructor(
+        address _xSafe) public {
+        xSafe = _xSafe;
+        attPool = new TokenPool(att);
     }
     
     function getMintAmount(uint256 amountIn) public view returns (uint256) {
         if (totalSupply() == 0) {
             return amountIn * 1e9;
         } else {
-            return totalSupply().mul(amountIn).div(dittoPool.balance());
+            return totalSupply().mul(amountIn).div(attPool.balance());
         }
     }
     
     function getRedeemAmount(uint256 amount) public view returns (uint256) {
-        return dittoPool.balance().mul(amount).div(totalSupply());
+        return attPool.balance().mul(amount).div(totalSupply());
     }
     
     function mint(address _to, uint256 _amountIn) public {
-        
+        if(att.balanceOf(xSafe) != 0){
+        IxSafe(xSafe).releaseRewards();
+        }
         uint256 mintAmount = getMintAmount(_amountIn);
         
-        ditto.transferFrom(msg.sender, address(dittoPool), _amountIn);
+        att.transferFrom(msg.sender, address(attPool), _amountIn);
         _mint(_to, mintAmount);
         
         _moveDelegates(address(0), _delegates[_to], mintAmount);
     }
     
     function burn(uint256 _amount) public {
-        
+        if(att.balanceOf(xSafe) != 0){
+        IxSafe(xSafe).releaseRewards();
+        }
         uint256 redeemAmount = getRedeemAmount(_amount);
         
         require(redeemAmount > 0, "Burn amount too small");
         
         _burn(msg.sender, _amount);
-        dittoPool.transfer(msg.sender, redeemAmount);
+        attPool.transfer(msg.sender, redeemAmount);
 
         _moveDelegates(_delegates[msg.sender], address(0), _amount);
     }
@@ -1025,9 +1007,9 @@ contract xDitto is BEP20('xDitto', 'XDITTO') {
         );
 
         address signatory = ecrecover(digest, v, r, s);
-        require(signatory != address(0), "DITTO::delegateBySig: invalid signature");
-        require(nonce == nonces[signatory]++, "DITTO::delegateBySig: invalid nonce");
-        require(now <= expiry, "DITTO::delegateBySig: signature expired");
+        require(signatory != address(0), "ATT::delegateBySig: invalid signature");
+        require(nonce == nonces[signatory]++, "ATT::delegateBySig: invalid nonce");
+        require(now <= expiry, "ATT::delegateBySig: signature expired");
         return _delegate(signatory, delegatee);
     }
 
@@ -1057,7 +1039,7 @@ contract xDitto is BEP20('xDitto', 'XDITTO') {
         view
         returns (uint256)
     {
-        require(blockNumber < block.number, "DITTO::getPriorVotes: not yet determined");
+        require(blockNumber < block.number, "ATT::getPriorVotes: not yet determined");
 
         uint32 nCheckpoints = numCheckpoints[account];
         if (nCheckpoints == 0) {
@@ -1094,7 +1076,7 @@ contract xDitto is BEP20('xDitto', 'XDITTO') {
         internal
     {
         address currentDelegate = _delegates[delegator];
-        uint256 delegatorBalance = balanceOf(delegator); // balance of underlying DITTOs (not scaled);
+        uint256 delegatorBalance = balanceOf(delegator); // balance of underlying ATTs (not scaled);
         _delegates[delegator] = delegatee;
 
         emit DelegateChanged(delegator, currentDelegate, delegatee);
@@ -1130,7 +1112,7 @@ contract xDitto is BEP20('xDitto', 'XDITTO') {
     )
         internal
     {
-        uint32 blockNumber = safe32(block.number, "DITTO::_writeCheckpoint: block number exceeds 32 bits");
+        uint32 blockNumber = safe32(block.number, "ATT::_writeCheckpoint: block number exceeds 32 bits");
 
         if (nCheckpoints > 0 && checkpoints[delegatee][nCheckpoints - 1].fromBlock == blockNumber) {
             checkpoints[delegatee][nCheckpoints - 1].votes = newVotes;
