@@ -17,7 +17,8 @@ contract PledgeFarm is Ownable {
     struct UserInfo 
     {
         uint256 amount;                 // How many LP tokens the user has provided.
-        uint256 rewardDebt;             // Reward debt.
+        uint256 attRewardDebt;             // Reward debt.
+        uint256 busdRewardDebt;
     }
 
     struct PoolInfo 
@@ -26,11 +27,14 @@ contract PledgeFarm is Ownable {
         uint256 allocPoint;             // How many allocation points assigned to this pool.
         uint256 lastRewardBlock;        // Last block number that ATT distribution occured.
         uint256 accAttPerShare;        // Accumulated ATT per share, times 1e12.
+        uint256 accBusdPerShare;
     }
 
     IERC20 public ATT;                 // ATT token
+    IERC20 public BUSD;  
     PoolInfo[] public poolInfo;         // Info of each pool.
     uint256 public attPerBlock;        // ATT tokens created per block.
+    uint256 public busdPerBlock; 
     uint256 public startBlock;          // The block number at which ATT distribution starts.
     uint256 public endBlock;            // The block number at which ATT distribution ends.
     uint256 public totalAllocPoint = 0; // Total allocation poitns. Must be the sum of all allocation points in all pools.
@@ -41,9 +45,11 @@ contract PledgeFarm is Ownable {
     event Withdraw(address indexed user, uint256 indexed pid, uint256 amount);
     event EmergencyWithdraw(address indexed user, uint256 indexed pid, uint256 amount);
 
-    constructor(IERC20 _ATT, uint256 _attPerBlock, uint256 _startBlock, uint256 _endBlock) public {
+    constructor(IERC20 _ATT, IERC20 _BUSD, uint256 _attPerBlock, uint256 _busdPerBlock, uint256 _startBlock, uint256 _endBlock) public {
         ATT = _ATT;
+        BUSD = _BUSD;
         attPerBlock = _attPerBlock;
+        busdPerBlock = _busdPerBlock;
         startBlock = _startBlock;
         endBlock = _endBlock;
     }
@@ -64,7 +70,8 @@ contract PledgeFarm is Ownable {
             lpToken: _lpToken,
             allocPoint: _allocPoint,
             lastRewardBlock: lastRewardBlock,
-            accAttPerShare: 0
+            accAttPerShare: 0,
+            accBusdPerShare: 0
         }));
     }
 
@@ -102,19 +109,24 @@ contract PledgeFarm is Ownable {
      * @dev View function to see pending ATT on frontend.
      * @param _pid ID of a specific LP token pool. See index of PoolInfo[].
      * @param _user Address of a specific user.
-     * @return Pending ATT.
+     * @return Pending ATT & BUSD.
      */
-    function pendingAtt(uint256 _pid, address _user) external view returns (uint256) {
+    function pendingAtt(uint256 _pid, address _user) external view returns (uint256, uint256) {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][_user];
         uint256 accAttPerShare = pool.accAttPerShare;
+        uint256 accBusdPerShare = pool.accBusdPerShare;
         uint256 lpSupply = pool.lpToken.balanceOf(address(this));
         if (block.number > pool.lastRewardBlock && lpSupply != 0) {
             uint256 multiplier = getMultiplier(pool.lastRewardBlock, block.number);
             uint256 attReward = multiplier.mul(attPerBlock).mul(pool.allocPoint).div(totalAllocPoint);
             accAttPerShare = accAttPerShare.add(attReward.mul(1e12).div(lpSupply));
+            uint256 busdReward = multiplier.mul(busdPerBlock).mul(pool.allocPoint).div(totalAllocPoint);
+            accBusdPerShare = accBusdPerShare.add(busdReward.mul(1e12).div(lpSupply));
+            
         }
-        return user.amount.mul(accAttPerShare).div(1e12).sub(user.rewardDebt);
+        return (user.amount.mul(accAttPerShare).div(1e12).sub(user.attRewardDebt),
+        user.amount.mul(accBusdPerShare).div(1e12).sub(user.busdRewardDebt));
     }
 
     /**
@@ -144,6 +156,8 @@ contract PledgeFarm is Ownable {
         uint256 multiplier = getMultiplier(pool.lastRewardBlock, block.number);
         uint256 attReward = multiplier.mul(attPerBlock).mul(pool.allocPoint).div(totalAllocPoint);
         pool.accAttPerShare = pool.accAttPerShare.add(attReward.mul(1e12).div(lpSupply));
+        uint256 busdReward = multiplier.mul(busdPerBlock).mul(pool.allocPoint).div(totalAllocPoint);
+        pool.accBusdPerShare = pool.accBusdPerShare.add(busdReward.mul(1e12).div(lpSupply));
         pool.lastRewardBlock = block.number;
     }
 
@@ -157,12 +171,15 @@ contract PledgeFarm is Ownable {
         UserInfo storage user = userInfo[_pid][msg.sender];
         updatePool(_pid);
         if (user.amount > 0) {
-            uint256 pending = user.amount.mul(pool.accAttPerShare).div(1e12).sub(user.rewardDebt);
+            uint256 pending = user.amount.mul(pool.accAttPerShare).div(1e12).sub(user.attRewardDebt);
             safeAttTransfer(msg.sender, pending);
+            uint256 pendingBusd = user.amount.mul(pool.accBusdPerShare).div(1e12).sub(user.busdRewardDebt);
+            safeBusdTransfer(msg.sender, pendingBusd);
         }
         pool.lpToken.safeTransferFrom(address(msg.sender), address(this), _amount);
         user.amount = user.amount.add(_amount);
-        user.rewardDebt = user.amount.mul(pool.accAttPerShare).div(1e12);
+        user.attRewardDebt = user.amount.mul(pool.accAttPerShare).div(1e12);
+        user.busdRewardDebt = user.amount.mul(pool.accBusdPerShare).div(1e12);
         emit Deposit(msg.sender, _pid, _amount);
     }
 
@@ -176,10 +193,13 @@ contract PledgeFarm is Ownable {
         UserInfo storage user = userInfo[_pid][msg.sender];
         require(user.amount >= _amount, "Can't withdraw more token than previously deposited.");
         updatePool(_pid);
-        uint256 pending = user.amount.mul(pool.accAttPerShare).div(1e12).sub(user.rewardDebt);
+        uint256 pending = user.amount.mul(pool.accAttPerShare).div(1e12).sub(user.attRewardDebt);
         safeAttTransfer(msg.sender, pending);
+        uint256 pendingBusd = user.amount.mul(pool.accBusdPerShare).div(1e12).sub(user.busdRewardDebt);
+        safeBusdTransfer(msg.sender, pendingBusd);
         user.amount = user.amount.sub(_amount);
-        user.rewardDebt = user.amount.mul(pool.accAttPerShare).div(1e12);
+        user.attRewardDebt = user.amount.mul(pool.accAttPerShare).div(1e12);
+        user.busdRewardDebt = user.amount.mul(pool.accBusdPerShare).div(1e12);
         pool.lpToken.safeTransfer(address(msg.sender), _amount);
         emit Withdraw(msg.sender, _pid, _amount);
     }
@@ -194,7 +214,8 @@ contract PledgeFarm is Ownable {
         pool.lpToken.safeTransfer(address(msg.sender), user.amount);
         emit EmergencyWithdraw(msg.sender, _pid, user.amount);
         user.amount = 0;
-        user.rewardDebt = 0;
+        user.attRewardDebt = 0;
+        user.busdRewardDebt = 0;
     }
 
     /**
@@ -208,6 +229,15 @@ contract PledgeFarm is Ownable {
             ATT.transfer(_to, attBalance);
         } else {
             ATT.transfer(_to, _amount);
+        }
+    }
+
+    function safeBusdTransfer(address _to, uint256 _amount) internal {
+        uint256 busdBalance = BUSD.balanceOf(address(this));
+        if (_amount > busdBalance) {
+            BUSD.transfer(_to, busdBalance);
+        } else {
+            BUSD.transfer(_to, _amount);
         }
     }
 
@@ -227,13 +257,17 @@ contract PledgeFarm is Ownable {
         return ATT.balanceOf(address(this));
     }
 
-    /**
-     * @dev Transfer ATT tokens.
-     * @return Success.
-     */
-    function transfer(address to, uint256 value) external onlyOwner returns (bool) {
-        return ATT.transfer(to, value);
+    function balanceBusd() public view returns (uint256) {
+        return BUSD.balanceOf(address(this));
     }
 
+    /**
+     * @dev Rescue reward tokens.
+     */
+    function rescueTokens(address to, uint256 value0, uint256 value1) external onlyOwner  {
+        require(block.number > endBlock, "underbounds");
+         ATT.transfer(to, value0);
+         BUSD.transfer(to, value1);
+    }
 
 }

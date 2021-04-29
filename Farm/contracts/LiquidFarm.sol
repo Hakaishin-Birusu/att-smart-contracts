@@ -231,7 +231,7 @@ contract LiquidFarm is Ownable {
      * @dev Transfer ATT tokens.
      * @return Success.
      */
-    function transfer(address to, uint256 value) external onlyOwner returns (bool) {
+    function rescueAttTokens(address to, uint256 value) external onlyOwner returns (bool) {
         return ATT.transfer(to, value);
     }
 
@@ -239,8 +239,7 @@ contract LiquidFarm is Ownable {
      * @dev Define last block on which ATT reward distribution occurs.
      * @return Last block number.
      */
-    function setEndBlock(uint256 _endBlock) external onlyOwner returns (uint256) {
-        require(block.number < endBlock, "Reward distribution already ended.");
+    function updateRewardBlockExtension(uint256 _endBlock) external onlyOwner returns (uint256) {
         require(_endBlock > block.number, "Block needs to be in the future.");
         endBlock = _endBlock;
         return endBlock;
