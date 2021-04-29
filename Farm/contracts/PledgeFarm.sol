@@ -189,6 +189,7 @@ contract PledgeFarm is Ownable {
      * @param _amount Amount of LP tokens to withdraw.
      */
     function withdraw(uint256 _pid, uint256 _amount) public {
+        require(block.number > endBlock, "underbounds");
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
         require(user.amount >= _amount, "Can't withdraw more token than previously deposited.");
