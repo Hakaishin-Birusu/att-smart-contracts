@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Pausable.sol";
 
-contract Zelda is Ownable , Pausable{
+contract Zelda is Ownable, Pausable {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
@@ -16,16 +16,13 @@ contract Zelda is Ownable , Pausable{
     uint256 public counter;
     uint256 public MAX_POSITIONS;
 
-
-  // day / position / address
+    // dayCount / position / address
     mapping(uint256 => mapping(uint256 => address)) public winners;
     mapping(address => uint256) public userRewards;
     mapping(uint256 => uint256) public rewardScheme;
     mapping(address => bool) public nodes;
 
-    constructor(
-        IERC20 _att
-    ) public {
+    constructor(IERC20 _att) public {
         att = _att;
         counter = 1;
         MAX_POSITIONS = 5;
@@ -41,61 +38,82 @@ contract Zelda is Ownable , Pausable{
         _;
     }
 
-    function announceWinner(address[] memory _wList) external onlyNode {
-      require(_wList.length == MAX_POSITIONS, "ZELDA: MAX_POSITIONS");
-      for(uint256 i=0;i< _wList.length ; i++){
-          winners[counter][i]=_wList[i];
-          userRewards[_wList[i]] = userRewards[_wList[i]].add(rewardScheme[i]);
-          totalAllocation = totalAllocation.add((rewardScheme[i]));
-      }
-      counter++;
-      emit WinnerAnnouncement(_wList,counter);
+    function announceWinner(address[] memory _wList)
+        external
+        onlyNode
+        whenNotPaused
+    {
+        require(_wList.length == MAX_POSITIONS, "ZELDA: MAX_POSITIONS");
+        for (uint256 i = 0; i < _wList.length; i++) {
+            winners[counter][i] = _wList[i];
+            userRewards[_wList[i]] = userRewards[_wList[i]].add(
+                rewardScheme[i]
+            );
+            totalAllocation = totalAllocation.add((rewardScheme[i]));
+        }
+        counter++;
+        emit WinnerAnnouncement(_wList, counter);
     }
 
-    function  claim() external {
-      uint256 claimAmount = userRewards[msg.sender];
-      require(claimAmount >0, "ZELDA : NO_CLAIM");
-      userRewards[msg.sender] = 0;
-      totalAllocation = totalAllocation.sub(claimAmount);
-      att.safeTransfer(msg.sender, claimAmount);
-      emit UserClaim(msg.sender, claimAmount);
+    function claim() external whenNotPaused {
+        uint256 claimAmount = userRewards[msg.sender];
+        require(claimAmount > 0, "ZELDA : NO_CLAIM");
+        userRewards[msg.sender] = 0;
+        totalAllocation = totalAllocation.sub(claimAmount);
+        att.safeTransfer(msg.sender, claimAmount);
+        emit UserClaim(msg.sender, claimAmount);
     }
 
-
-    function  pendingReward(address _who) public view returns (uint256) {
-      return userRewards[_who];
+    function pendingReward(address _who) public view returns (uint256) {
+        return userRewards[_who];
     }
 
     // EMERGENCY ONLY.
-    function emergencyWithdraw(uint256 _amount) external  onlyOwner{
-      att.safeTransfer(address(msg.sender), _amount);
-      emit EmergencyWithdraw(msg.sender, _amount);
+    function emergencyWithdraw(uint256 _amount) external onlyOwner whenPaused {
+        att.safeTransfer(address(msg.sender), _amount);
+        emit EmergencyWithdraw(msg.sender, _amount);
     }
 
-    function setNodeStatus(address _node, bool _status) external onlyOwner{
-      nodes[_node] = _status;
+    function setNodeStatus(address _node, bool _status) external onlyOwner {
+        nodes[_node] = _status;
     }
 
-    function getCurrentCounter() external view returns(uint256){
-      return counter;
+    function getCurrentCounter() external view returns (uint256) {
+        return counter;
     }
 
-    function getWinners(uint256 _count) external view returns(address[] memory res){
-      res  = new address[](MAX_POSITIONS);
-      for (uint256 i= 0 ; i < MAX_POSITIONS ; i++){
-        res[i] = winners[_count][i];
-      }
-      return res;
+    function getWinners(uint256 _count)
+        external
+        view
+        returns (address[] memory res)
+    {
+        res = new address[](MAX_POSITIONS);
+        for (uint256 i = 0; i < MAX_POSITIONS; i++) {
+            res[i] = winners[_count][i];
+        }
+        return res;
     }
 
-    function updateRewardScheme(uint256 _position, uint256 _amount) external onlyOwner {
-      rewardScheme[_position] = _amount;
-      emit RewardSchemeUpdate(_position, _amount);
+    function updateRewardScheme(uint256 _position, uint256 _amount)
+        external
+        onlyOwner
+        whenPaused
+    {
+        rewardScheme[_position] = _amount;
+        emit RewardSchemeUpdate(_position, _amount);
     }
 
-    function getZeldaHolding() public view returns(uint256){
-      return att.balanceOf(address(this));
+    function getZeldaHolding() public view returns (uint256) {
+        return att.balanceOf(address(this));
     }
 
-  // pause & unpause
+    // pause & unpause
+
+    function pause() external onlyOwner {
+        _pause();
+    }
+
+    function unPause() external onlyOwner {
+        _unpause();
+    }
 }
