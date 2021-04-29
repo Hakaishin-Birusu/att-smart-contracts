@@ -10,7 +10,10 @@ module.exports = function (deployer) {
 
         // Deploy MarketOracle
         await deployer.deploy(MarketOracle);
-        let marketOracleAddress = await deployer.deploy(MarketOracle);
+        let marketOracleAddress = await deployer.deploy
+        (MarketOracle, "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56",
+         "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56" ,
+        "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56");
 
         // Deploy Master and pass ATT ERC20 address
         await deployer.deploy(Master, attAddress.address);

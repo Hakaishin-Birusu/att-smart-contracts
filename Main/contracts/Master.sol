@@ -302,6 +302,7 @@ contract Master is Ownable {
     }
 
     event TransactionFailed(address indexed destination, uint index, bytes data);
+    event NewTargetRate(uint256 newRate, uint256 time);
 
     // Stable ordering is not guaranteed.
     Transaction[] public transactions;
@@ -341,6 +342,8 @@ contract Master is Ownable {
     // MAX_SUPPLY = MAX_INT256 / MAX_RATE
     uint256 private constant MAX_SUPPLY = ~(uint256(1) << 255) / MAX_RATE;
 
+    uint256 private currentTargetRate;
+
     // Rebase will remain restricted to the owner until the final Oracle is deployed and battle-tested.
     // Ownership will be renounced after this inital period.     
 
@@ -348,7 +351,7 @@ contract Master is Ownable {
 
     constructor(address _att) public {
         deviationThreshold = 5 * 10 ** (DECIMALS-2);
-
+        currentTargetRate = 10 ** DECIMALS;
         rebaseCooldown = 4 hours;
         lastRebaseTimestampSec = 0;
         epoch = 0;
@@ -431,7 +434,7 @@ contract Master is Ownable {
     
     function getRebaseValues() public view returns (uint256, uint256, int256) {
 
-        uint256 targetRate = 10 ** DECIMALS;
+        uint256 targetRate = currentTargetRate;
         uint256 exchangeRate = marketOracle.getData();
 
         if (exchangeRate > MAX_RATE) {
@@ -592,4 +595,8 @@ contract Master is Ownable {
         return result;
     }    
     
+    function updateTargetRate(uint256 _newRate) external onlyOwner {
+        currentTargetRate = _newRate;
+        emit NewTargetRate(currentTargetRate, now);
+    }
 }
