@@ -10,156 +10,116 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 
 contract PledgeFarm is Ownable {
+    
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
-    // Info of each user.
-    struct UserInfo {
-        uint256 amount; // How many LP tokens the user has provided.
-        uint256 rewardDebt; // Reward debt. See explanation below.
-        //
-        // We do some fancy math here. Basically, any point in time, the amount of ATTs
-        // entitled to a user but is pending to be distributed is:
-        //
-        //   pending reward = (user.amount * pool.accAttPerShare) - user.rewardDebt
-        //
-        // Whenever a user deposits or withdraws LP tokens to a pool. Here's what happens:
-        //   1. The pool's `accAttPerShare` (and `lastRewardBlock`) gets updated.
-        //   2. User receives the pending reward sent to his/her address.
-        //   3. User's `amount` gets updated.
-        //   4. User's `rewardDebt` gets updated.
+
+    struct UserInfo 
+    {
+        uint256 amount;                 // How many LP tokens the user has provided.
+        uint256 rewardDebt;             // Reward debt.
     }
-    // Info of each pool.
-    struct PoolInfo {
-        IERC20 lpToken; // Address of LP token contract.
-        uint256 allocPoint; // How many allocation points assigned to this pool. ATTs to distribute per block.
-        uint256 lastRewardBlock; // Last block number that ATTs distribution occurs.
-        uint256 accAttPerShare; // Accumulated ATTs per share, times 1e12. See below.
+
+    struct PoolInfo 
+    {
+        IERC20 lpToken;                 // Address of LP token contract.
+        uint256 allocPoint;             // How many allocation points assigned to this pool.
+        uint256 lastRewardBlock;        // Last block number that ATT distribution occured.
+        uint256 accAttPerShare;        // Accumulated ATT per share, times 1e12.
     }
-    // The ATT TOKEN!
-    IERC20 public att;
-    // The BUSD Token!
-    IERC20 public busd;
-    // Dev address.
-    address public devaddr;
-    // Block number when ATT rewar cycle ends.
-    uint256 public endBlock;
-    // ATT tokens created per block.
-    uint256 public attPerBlock;
-    // Info of each pool.
-    PoolInfo[] public poolInfo;
-    // Info of each user that stakes LP tokens.
-    mapping(uint256 => mapping(address => UserInfo)) public userInfo;
-    // Total allocation poitns. Must be the sum of all allocation points in all pools.
-    uint256 public totalAllocPoint = 0;
-    // The block number when ATT mining starts.
-    uint256 public startBlock;
+
+    IERC20 public ATT;                 // ATT token
+    PoolInfo[] public poolInfo;         // Info of each pool.
+    uint256 public attPerBlock;        // ATT tokens created per block.
+    uint256 public startBlock;          // The block number at which ATT distribution starts.
+    uint256 public endBlock;            // The block number at which ATT distribution ends.
+    uint256 public totalAllocPoint = 0; // Total allocation poitns. Must be the sum of all allocation points in all pools.
+
+    mapping (uint256 => mapping (address => UserInfo)) public userInfo;     // Info of each user that stakes LP tokens.
+
     event Deposit(address indexed user, uint256 indexed pid, uint256 amount);
     event Withdraw(address indexed user, uint256 indexed pid, uint256 amount);
-    event EmergencyWithdraw(
-        address indexed user,
-        uint256 indexed pid,
-        uint256 amount
-    );
+    event EmergencyWithdraw(address indexed user, uint256 indexed pid, uint256 amount);
 
-    constructor(
-        IERC20 _att,
-        IERC20 _busd,
-        address _devaddr,
-        uint256 _attPerBlock,
-        uint256 _startBlock,
-        uint256 _endBlock
-    ) public {
-        att = _att;
-        busd = _busd;
-        devaddr = _devaddr;
+    constructor(IERC20 _ATT, uint256 _attPerBlock, uint256 _startBlock, uint256 _endBlock) public {
+        ATT = _ATT;
         attPerBlock = _attPerBlock;
-        endBlock = _endBlock;
         startBlock = _startBlock;
+        endBlock = _endBlock;
     }
 
-    function poolLength() external view returns (uint256) {
-        return poolInfo.length;
-    }
-
-    // Add a new lp to the pool. Can only be called by the owner.
-    // XXX DO NOT add the same LP token more than once. Rewards will be messed up if you do.
-    function add(
-        uint256 _allocPoint,
-        IERC20 _lpToken,
-        bool _withUpdate
-    ) public onlyOwner {
+    /**
+     * @dev Adds a new lp to the pool. Can only be called by the owner. DO NOT add the same LP token more than once.
+     * @param _allocPoint How many allocation points to assign to this pool.
+     * @param _lpToken Address of LP token contract.
+     * @param _withUpdate Whether to update all LP token contracts. Should be true if ATT distribution has already begun.
+     */
+    function add(uint256 _allocPoint, IERC20 _lpToken, bool _withUpdate) public onlyOwner {
         if (_withUpdate) {
             massUpdatePools();
         }
-        uint256 lastRewardBlock =
-            block.number > startBlock ? block.number : startBlock;
+        uint256 lastRewardBlock = block.number > startBlock ? block.number : startBlock;
         totalAllocPoint = totalAllocPoint.add(_allocPoint);
-        poolInfo.push(
-            PoolInfo({
-                lpToken: _lpToken,
-                allocPoint: _allocPoint,
-                lastRewardBlock: lastRewardBlock,
-                accAttPerShare: 0
-            })
-        );
+        poolInfo.push(PoolInfo({
+            lpToken: _lpToken,
+            allocPoint: _allocPoint,
+            lastRewardBlock: lastRewardBlock,
+            accAttPerShare: 0
+        }));
     }
 
-    // Update the given pool's ATT allocation point. Can only be called by the owner.
-    function set(
-        uint256 _pid,
-        uint256 _allocPoint,
-        bool _withUpdate
-    ) public onlyOwner {
+    /**
+     * @dev Update the given pool's ATT allocation point. Can only be called by the owner.
+     * @param _pid ID of a specific LP token pool. See index of PoolInfo[].
+     * @param _allocPoint How many allocation points to assign to this pool.
+     * @param _withUpdate Whether to update all LP token contracts. Should be true if ATT distribution has already begun.
+     */
+    function set(uint256 _pid, uint256 _allocPoint, bool _withUpdate) public onlyOwner {
         if (_withUpdate) {
             massUpdatePools();
         }
-        totalAllocPoint = totalAllocPoint.sub(poolInfo[_pid].allocPoint).add(
-            _allocPoint
-        );
+        totalAllocPoint = totalAllocPoint.sub(poolInfo[_pid].allocPoint).add(_allocPoint);
         poolInfo[_pid].allocPoint = _allocPoint;
     }
 
-
-    // Return reward multiplier over the given _from to _to block.
-    function getMultiplier(uint256 _from, uint256 _to)
-        public
-        view
-        returns (uint256)
-    {
-        if (_from >= _to || _from >= endBlock) {
-            return 0;
-        } else if (_to > endBlock) {
-            return endBlock.sub(_from);
-        } else {
+    /**
+     * @dev Return reward multiplier over the given _from to _to blocks based on block count.
+     * @param _from First block.
+     * @param _to Last block.
+     * @return Number of blocks.
+     */
+    function getMultiplier(uint256 _from, uint256 _to) internal view returns (uint256) {
+        if (_to < endBlock) {
             return _to.sub(_from);
-        }
+        } else if (_from >= endBlock) {
+            return 0;
+        } else {
+            return endBlock.sub(_from);
+        }     
     }
 
-    // View function to see pending ATTs on frontend.
-    function pendingRewards(uint256 _pid, address _user)
-        external
-        view
-        returns (uint256, uint256)
-    {
+    /**
+     * @dev View function to see pending ATT on frontend.
+     * @param _pid ID of a specific LP token pool. See index of PoolInfo[].
+     * @param _user Address of a specific user.
+     * @return Pending ATT.
+     */
+    function pendingAtt(uint256 _pid, address _user) external view returns (uint256) {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][_user];
         uint256 accAttPerShare = pool.accAttPerShare;
         uint256 lpSupply = pool.lpToken.balanceOf(address(this));
         if (block.number > pool.lastRewardBlock && lpSupply != 0) {
-            uint256 multiplier =
-                getMultiplier(pool.lastRewardBlock, block.number);
-            uint256 attReward =
-                multiplier.mul(attPerBlock).mul(pool.allocPoint).div(
-                    totalAllocPoint
-                );
-            accAttPerShare = accAttPerShare.add(
-                attReward.mul(1e12).div(lpSupply)
-            );
+            uint256 multiplier = getMultiplier(pool.lastRewardBlock, block.number);
+            uint256 attReward = multiplier.mul(attPerBlock).mul(pool.allocPoint).div(totalAllocPoint);
+            accAttPerShare = accAttPerShare.add(attReward.mul(1e12).div(lpSupply));
         }
         return user.amount.mul(accAttPerShare).div(1e12).sub(user.rewardDebt);
     }
 
-    // Update reward vairables for all pools. Be careful of gas spending!
+    /**
+     * @dev Update reward vairables for all pools. Be careful of gas spending!
+     */
     function massUpdatePools() public {
         uint256 length = poolInfo.length;
         for (uint256 pid = 0; pid < length; ++pid) {
@@ -167,7 +127,10 @@ contract PledgeFarm is Ownable {
         }
     }
 
-    // Update reward variables of the given pool to be up-to-date.
+    /**
+     * @dev Update reward variables of the given pool to be up-to-date.
+     * @param _pid ID of a specific LP token pool. See index of PoolInfo[].
+     */
     function updatePool(uint256 _pid) public {
         PoolInfo storage pool = poolInfo[_pid];
         if (block.number <= pool.lastRewardBlock) {
@@ -179,50 +142,41 @@ contract PledgeFarm is Ownable {
             return;
         }
         uint256 multiplier = getMultiplier(pool.lastRewardBlock, block.number);
-        uint256 attReward =
-            multiplier.mul(attPerBlock).mul(pool.allocPoint).div(
-                totalAllocPoint
-            );
-        // att.mint(devaddr, attReward.div(10));
-        // att.mint(address(this), attReward);
-        pool.accAttPerShare = pool.accAttPerShare.add(
-            attReward.mul(1e12).div(lpSupply)
-        );
+        uint256 attReward = multiplier.mul(attPerBlock).mul(pool.allocPoint).div(totalAllocPoint);
+        pool.accAttPerShare = pool.accAttPerShare.add(attReward.mul(1e12).div(lpSupply));
         pool.lastRewardBlock = block.number;
     }
 
-    // Deposit LP tokens to MasterChef for ATT allocation.
+    /**
+     * @dev Deposit LP tokens to Faucet for ATT allocation.
+     * @param _pid ID of a specific LP token pool. See index of PoolInfo[].
+     * @param _amount Amount of LP tokens to deposit.
+     */
     function deposit(uint256 _pid, uint256 _amount) public {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
         updatePool(_pid);
         if (user.amount > 0) {
-            uint256 pending =
-                user.amount.mul(pool.accAttPerShare).div(1e12).sub(
-                    user.rewardDebt
-                );
+            uint256 pending = user.amount.mul(pool.accAttPerShare).div(1e12).sub(user.rewardDebt);
             safeAttTransfer(msg.sender, pending);
         }
-        pool.lpToken.safeTransferFrom(
-            address(msg.sender),
-            address(this),
-            _amount
-        );
+        pool.lpToken.safeTransferFrom(address(msg.sender), address(this), _amount);
         user.amount = user.amount.add(_amount);
         user.rewardDebt = user.amount.mul(pool.accAttPerShare).div(1e12);
         emit Deposit(msg.sender, _pid, _amount);
     }
 
-    // Withdraw LP tokens from MasterChef.
+    /**
+     * @dev Withdraw LP tokens from MasterChef.
+     * @param _pid ID of a specific LP token pool. See index of PoolInfo[].
+     * @param _amount Amount of LP tokens to withdraw.
+     */
     function withdraw(uint256 _pid, uint256 _amount) public {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
-        require(user.amount >= _amount, "withdraw: not good");
+        require(user.amount >= _amount, "Can't withdraw more token than previously deposited.");
         updatePool(_pid);
-        uint256 pending =
-            user.amount.mul(pool.accAttPerShare).div(1e12).sub(
-                user.rewardDebt
-            );
+        uint256 pending = user.amount.mul(pool.accAttPerShare).div(1e12).sub(user.rewardDebt);
         safeAttTransfer(msg.sender, pending);
         user.amount = user.amount.sub(_amount);
         user.rewardDebt = user.amount.mul(pool.accAttPerShare).div(1e12);
@@ -230,7 +184,10 @@ contract PledgeFarm is Ownable {
         emit Withdraw(msg.sender, _pid, _amount);
     }
 
-    // Withdraw without caring about rewards. EMERGENCY ONLY.
+    /**
+     * @dev Withdraw without caring about rewards. EMERGENCY ONLY.
+     * @param _pid ID of a specific LP token pool. See index of PoolInfo[].
+     */
     function emergencyWithdraw(uint256 _pid) public {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
@@ -240,33 +197,43 @@ contract PledgeFarm is Ownable {
         user.rewardDebt = 0;
     }
 
-    function rescueFunds( address to, uint256 amount)external returns (bool) {
-        require(msg.sender == devaddr, "dev: wut?");
-        return att.transfer(to, amount);
-    }
-
-    // Safe att transfer function, just in case if rounding error causes pool to not have enough ATTs.
+    /**
+     * @dev Safe att transfer function, just in case if rounding error causes faucet to not have enough ATT.
+     * @param _to Target address.
+     * @param _amount Amount of ATT to transfer.
+     */
     function safeAttTransfer(address _to, uint256 _amount) internal {
-        uint256 attBal = att.balanceOf(address(this));
-        if (_amount > attBal) {
-            att.transfer(_to, attBal);
+        uint256 attBalance = ATT.balanceOf(address(this));
+        if (_amount > attBalance) {
+            ATT.transfer(_to, attBalance);
         } else {
-            att.transfer(_to, _amount);
+            ATT.transfer(_to, _amount);
         }
     }
 
-    function safeBUSDTransfer(address _to, uint256 _amount) internal {
-        uint256 busdBal = busd.balanceOf(address(this));
-        if (_amount > busdBal) {
-            busd.transfer(_to, busdBal);
-        } else {
-            busd.transfer(_to, _amount);
-        }
+    /**
+     * @dev Views total number of LP token pools.
+     * @return Size of poolInfo array.
+     */
+    function poolLength() external view returns (uint256) {
+        return poolInfo.length;
+    }
+    
+    /**
+     * @dev Views total number of ATT tokens deposited for rewards.
+     * @return ATT token balance of the faucet.
+     */
+    function balance() public view returns (uint256) {
+        return ATT.balanceOf(address(this));
     }
 
-    // Update dev address by the previous dev.
-    function dev(address _devaddr) public {
-        require(msg.sender == devaddr, "dev: wut?");
-        devaddr = _devaddr;
+    /**
+     * @dev Transfer ATT tokens.
+     * @return Success.
+     */
+    function transfer(address to, uint256 value) external onlyOwner returns (bool) {
+        return ATT.transfer(to, value);
     }
+
+
 }
