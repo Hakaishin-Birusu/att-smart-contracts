@@ -104,7 +104,7 @@ contract LiquidFarm is Ownable {
      * @param _user Address of a specific user.
      * @return Pending ATT.
      */
-    function pendingAtt(uint256 _pid, address _user) external view returns (uint256) {
+    function pendingAtt(uint256 _pid, address _user) external view returns (uint256, uint256) {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][_user];
         uint256 accAttPerShare = pool.accAttPerShare;
@@ -114,7 +114,7 @@ contract LiquidFarm is Ownable {
             uint256 attReward = multiplier.mul(attPerBlock).mul(pool.allocPoint).div(totalAllocPoint);
             accAttPerShare = accAttPerShare.add(attReward.mul(1e12).div(lpSupply));
         }
-        return user.amount.mul(accAttPerShare).div(1e12).sub(user.rewardDebt);
+        return (user.amount,user.amount.mul(accAttPerShare).div(1e12).sub(user.rewardDebt));
     }
 
     /**
@@ -153,6 +153,7 @@ contract LiquidFarm is Ownable {
      * @param _amount Amount of LP tokens to deposit.
      */
     function deposit(uint256 _pid, uint256 _amount) public {
+        require(_amount <= userLpBalance(_pid, msg.sender), "INSUFFICIENT_BALANCE");
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
         updatePool(_pid);
@@ -164,6 +165,11 @@ contract LiquidFarm is Ownable {
         user.amount = user.amount.add(_amount);
         user.rewardDebt = user.amount.mul(pool.accAttPerShare).div(1e12);
         emit Deposit(msg.sender, _pid, _amount);
+    }
+
+    function userLpBalance(uint256 _pid, address _user ) public view returns(uint256){
+        PoolInfo storage pool = poolInfo[_pid];
+        return pool.lpToken.balanceOf(_user);
     }
 
     /**
@@ -239,7 +245,7 @@ contract LiquidFarm is Ownable {
      * @dev Define last block on which ATT reward distribution occurs.
      * @return Last block number.
      */
-    function updateRewardBlockExtension(uint256 _endBlock) external onlyOwner returns (uint256) {
+    function rewardBlockExtension(uint256 _endBlock) external onlyOwner returns (uint256) {
         require(_endBlock > block.number, "Block needs to be in the future.");
         endBlock = _endBlock;
         return endBlock;

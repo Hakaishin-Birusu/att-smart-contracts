@@ -4,12 +4,16 @@ pragma experimental ABIEncoderV2;
 
 import "./interfaces/IZelda.sol";
 import "./interfaces/IXsafe.sol";
+import "./interfaces/ILiquidFarm.sol";
+import "./interfaces/IPledgeFarm.sol";
 
 contract WatchTower {
 
     uint256 private maxRetPerStance = 5;
     IZelda public zelda;
     IXsafe public xsafe;
+    ILiquidFarm public liquid;
+    IPledgeFarm public pledge;
 
     struct winnerStruct {
         address winnerAddress;
@@ -20,10 +24,14 @@ contract WatchTower {
 
     constructor(
         address _zelda,
-        address _xsafe
+        address _xsafe,
+        address _liquid,
+        address _pledge
     ) public {
         zelda = IZelda(_zelda);
         xsafe = IXsafe(_xsafe);
+        liquid = ILiquidFarm(_liquid);
+        pledge = IPledgeFarm(_pledge);
     }
 
     function getCurrentBlock() public view returns (uint256) {
@@ -79,6 +87,21 @@ contract WatchTower {
        price = xsafe.toAtt(1);
        xSafeBalance = xsafe.getXsafeBalance();
        attLocked = xsafe.getAttPoolBalance();
+    }
+
+    function userUnstakeLiquid(uint256 _pid, address _user) public view returns(uint256 stake, uint256 estReturn){
+        (stake, estReturn) = liquid.pendingAtt(_pid, _user);
+    }
+
+    function userStakeLiquid(uint256 _pid,address _user) public view returns(uint256 stake, uint256 balance){
+        balance = liquid.userLpBalance(_pid, _user);
+        (stake, ) = liquid.pendingAtt(_pid, _user);   
+    }
+
+    function statsLiquid() public view returns(){
+        totalStaked = liquid.userLpBalance(_pid, address(liquid));
+        totalRewardLeft = liquid.balance();
+        resetblock = liquid.endBlock();
     }
 
 
