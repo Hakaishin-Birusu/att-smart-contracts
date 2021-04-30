@@ -98,10 +98,26 @@ contract WatchTower {
         (stake, ) = liquid.pendingAtt(_pid, _user);   
     }
 
-    function statsLiquid() public view returns(){
+    function statsLiquid(uint256 _pid) public view returns(uint256 totalStaked, uint256 totalRewardLeft, uint256 resetblock){
         totalStaked = liquid.userLpBalance(_pid, address(liquid));
         totalRewardLeft = liquid.balance();
         resetblock = liquid.endBlock();
+    }
+
+    function userUnstakePledge(uint256 _pid, address _user) public view returns(uint256 stake, uint256 estReturnAtt, uint256 estReturnBusd){
+        (stake, estReturnAtt, estReturnBusd) = pledge.pendingRewards(_pid, _user);
+    }
+
+    function userStakePledge(uint256 _pid,address _user) public view returns(uint256 stake, uint256 balance){
+        balance = pledge.userLpBalance(_pid, _user);
+        (stake, ,) = pledge.pendingRewards(_pid, _user);   
+    }
+
+    function statsPledge(uint256 _pid) public view returns(uint256 totalStaked, uint256 totalRewardLeftAtt, uint256 totalRewardLeftBusd,uint256 endblock){
+        totalStaked = pledge.userLpBalance(_pid, address(liquid));
+        totalRewardLeftAtt = pledge.balance();
+        totalRewardLeftBusd = pledge.balanceBusd();
+        endblock = pledge.endBlock();
     }
 
 

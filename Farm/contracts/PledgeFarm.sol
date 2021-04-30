@@ -111,7 +111,7 @@ contract PledgeFarm is Ownable {
      * @param _user Address of a specific user.
      * @return Pending ATT & BUSD.
      */
-    function pendingAtt(uint256 _pid, address _user) external view returns (uint256, uint256) {
+    function pendingRewards(uint256 _pid, address _user) external view returns (uint256, uint256, uint256) {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][_user];
         uint256 accAttPerShare = pool.accAttPerShare;
@@ -125,7 +125,7 @@ contract PledgeFarm is Ownable {
             accBusdPerShare = accBusdPerShare.add(busdReward.mul(1e12).div(lpSupply));
             
         }
-        return (user.amount.mul(accAttPerShare).div(1e12).sub(user.attRewardDebt),
+        return (user.amount, user.amount.mul(accAttPerShare).div(1e12).sub(user.attRewardDebt),
         user.amount.mul(accBusdPerShare).div(1e12).sub(user.busdRewardDebt));
     }
 
@@ -167,6 +167,7 @@ contract PledgeFarm is Ownable {
      * @param _amount Amount of LP tokens to deposit.
      */
     function deposit(uint256 _pid, uint256 _amount) public {
+        require(_amount <= userLpBalance(_pid, msg.sender), "INSUFFICIENT_BALANCE");
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
         updatePool(_pid);
@@ -181,6 +182,11 @@ contract PledgeFarm is Ownable {
         user.attRewardDebt = user.amount.mul(pool.accAttPerShare).div(1e12);
         user.busdRewardDebt = user.amount.mul(pool.accBusdPerShare).div(1e12);
         emit Deposit(msg.sender, _pid, _amount);
+    }
+
+    function userLpBalance(uint256 _pid, address _user ) public view returns(uint256){
+        PoolInfo storage pool = poolInfo[_pid];
+        return pool.lpToken.balanceOf(_user);
     }
 
     /**
