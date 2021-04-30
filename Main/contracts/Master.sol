@@ -342,7 +342,7 @@ contract Master is Ownable {
     // MAX_SUPPLY = MAX_INT256 / MAX_RATE
     uint256 private constant MAX_SUPPLY = ~(uint256(1) << 255) / MAX_RATE;
 
-    uint256 private currentTargetRate;
+    uint256 public currentTargetRate;
 
     // Rebase will remain restricted to the owner until the final Oracle is deployed and battle-tested.
     // Ownership will be renounced after this inital period.     

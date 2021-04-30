@@ -6,14 +6,21 @@ import "./interfaces/IZelda.sol";
 import "./interfaces/IXsafe.sol";
 import "./interfaces/ILiquidFarm.sol";
 import "./interfaces/IPledgeFarm.sol";
+import "./interfaces/IMaster.sol";
+import "./interfaces/IOracle.sol";
+import "./interfaces/IAtt.sol";
 
 contract WatchTower {
 
     uint256 private maxRetPerStance = 5;
+
     IZelda public zelda;
     IXsafe public xsafe;
     ILiquidFarm public liquid;
     IPledgeFarm public pledge;
+    IMaster public master;
+    IOracle public oracle;
+    IAtt public att;
 
     struct winnerStruct {
         address winnerAddress;
@@ -26,12 +33,18 @@ contract WatchTower {
         address _zelda,
         address _xsafe,
         address _liquid,
-        address _pledge
+        address _pledge,
+        address _master,
+        address _oracle,
+        address _att
     ) public {
         zelda = IZelda(_zelda);
         xsafe = IXsafe(_xsafe);
         liquid = ILiquidFarm(_liquid);
         pledge = IPledgeFarm(_pledge);
+        master = IMaster(_master);
+        oracle = IOracle(_oracle);
+        att = IAtt(_att);
     }
 
     function getCurrentBlock() public view returns (uint256) {
@@ -118,6 +131,20 @@ contract WatchTower {
         totalRewardLeftAtt = pledge.balance();
         totalRewardLeftBusd = pledge.balanceBusd();
         endblock = pledge.endBlock();
+    }
+
+    function statsDash() public view returns(uint256 lastRebase, uint256 nextRebase){
+        lastRebase = master.lastRebaseTimestampSec();
+        nextRebase = master.cooldownExpiryTimestamp();
+    }
+
+    function primaryStatsDash() public view returns(uint256 totalAttLocked, uint256 totalBusdLocked, uint256 totalBnbAttLpLocked , uint256 oracleRate,uint256 targetPrice, uint256 circulatingSupply){
+        oracleRate= oracle.getData();
+        targetPrice= master.currentTargetRate();
+        circulatingSupply= att.totalSupply();
+        totalAttLocked = pledge.balance() + liquid.balance() + zelda.balance() + xsafe.getXsafeBalance() + xsafe.getAttPoolBalance();
+        totalBusdLocked = pledge.balanceBusd();
+        totalBnbAttLpLocked = liquid.userLpBalance(0, address(liquid)) + pledge.userLpBalance(0, address(pledge));
     }
 
 

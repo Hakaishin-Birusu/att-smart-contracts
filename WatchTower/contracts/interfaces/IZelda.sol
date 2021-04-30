@@ -6,4 +6,5 @@ interface IZelda {
     function pendingReward(address) external view returns (uint256);
     function getWinners(uint256) external view returns (address[] memory);
     function getCurrentCounter() external view returns (uint256);
+    function balance() external view returns (uint256);
 }

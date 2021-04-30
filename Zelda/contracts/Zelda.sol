@@ -102,7 +102,7 @@ contract Zelda is Ownable, Pausable {
         emit RewardSchemeUpdate(_position, _amount);
     }
 
-    function getZeldaHolding() public view returns (uint256) {
+    function balance() public view returns (uint256) {
         return att.balanceOf(address(this));
     }
 
