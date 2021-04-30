@@ -13,7 +13,6 @@ contract xSafe is Ownable{
 
     IERC20 public att;
     IERC20 public xAtt;
-    address public devAddr;
     address public attPool;
     uint256 public kLast;
     uint256 public attPerBlock;
@@ -21,12 +20,9 @@ contract xSafe is Ownable{
     event Release(address indexed pool, uint256 releasedAmount, uint256 blockNumber);
     event EmergencyWithdraw(address indexed user, uint256 amount);
 
-    constructor(IERC20 _att, IERC20 _xAtt, uint256 _attPerBlock, address _devAddr, address _attPool) public {
+    constructor(IERC20 _att, uint256 _attPerBlock) public {
         att = _att;
-        xAtt = _xAtt;
-        devAddr = _devAddr;
         attPerBlock = _attPerBlock;
-        attPool = _attPool;
     }
 
     function releaseRewards() external {
@@ -35,26 +31,6 @@ contract xSafe is Ownable{
             _safeRelease(amount);
             kLast = block.number;
         }
-    }
-
-    // EMERGENCY ONLY.
-    function emergencyWithdraw(uint256 _amount) external onlyOwner {
-        att.safeTransfer(address(msg.sender), _amount);
-        emit EmergencyWithdraw(msg.sender, _amount);
-    }
-
-    function updateDev(address _devaddr) external onlyOwner {
-        devAddr = _devaddr;
-    }
-
-    function updateAttPool(address _attPool) external {
-        require(devAddr == msg.sender, "XSAFE: AUTH_FAILED");
-        attPool = _attPool;
-    }
-
-    function updateAttPerBlock(uint256 _attPerBlock) external {
-        require(devAddr == msg.sender, "XSAFE: AUTH_FAILED");
-        attPerBlock = _attPerBlock;
     }
 
     function _safeRelease(uint256 _amount) internal {
@@ -66,6 +42,24 @@ contract xSafe is Ownable{
         }
         emit Release(attPool, _amount, block.number);
     }
+
+    // EMERGENCY ONLY.
+    function emergencyWithdraw(uint256 _amount) external onlyOwner {
+        att.safeTransfer(address(msg.sender), _amount);
+        emit EmergencyWithdraw(msg.sender, _amount);
+    }
+
+    function updateXAtt(IERC20 _xAtt) external onlyOwner {
+        xAtt = _xAtt;
+    }
+
+    function updateAttPool(address _attPool) external onlyOwner{
+        attPool = _attPool;
+    }
+
+    function updateAttPerBlock(uint256 _attPerBlock) external onlyOwner{
+        attPerBlock = _attPerBlock;
+    }
     
     // View functions for frontend.
     function getUserStat(address who)
@@ -76,10 +70,6 @@ contract xSafe is Ownable{
         xBal = xAtt.balanceOf(who);
         (uint256 estimatedSupply,uint256 totalShares) = getEstimatedExchangeRate();
         bal = xBal.mul(estimatedSupply).div(totalShares);
-    }
-
-    function getXsafeBalance() public view returns(uint256){
-        return att.balanceOf(address(this));
     }
     
     function getEstimatedExchangeRate() public view returns (uint256 estimatedSupply, uint256 totalShares) {
@@ -106,9 +96,12 @@ contract xSafe is Ownable{
         return att.balanceOf(attPool);
     }
 
+    function getXsafeBalance() public view returns(uint256){
+        return att.balanceOf(address(this));
+    }
+
     function xattSupply() public view returns(uint256){
         return xAtt.totalSupply();
     }
-
 
 }

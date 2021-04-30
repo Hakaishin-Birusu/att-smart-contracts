@@ -864,13 +864,14 @@ interface IxSafe {
 
 contract xAtt is BEP20('xAtt', 'XATT') {
     
-    BEP20 att = BEP20(0x233d91A0713155003fc4DcE0AFa871b508B3B715);
-    TokenPool attPool;
-    address public xSafe;
+    BEP20 public att ;
+    TokenPool public attPool;
+    IxSafe public xSafe;
 
-    constructor(
+    constructor( address _att,
         address _xSafe) public {
-        xSafe = _xSafe;
+        att = BEP20(_att);
+        xSafe = IxSafe(_xSafe);
         attPool = new TokenPool(att);
     }
     
@@ -887,8 +888,8 @@ contract xAtt is BEP20('xAtt', 'XATT') {
     }
     
     function mint(address _to, uint256 _amountIn) public {
-        if(att.balanceOf(xSafe) != 0){
-        IxSafe(xSafe).releaseRewards();
+        if(att.balanceOf(address(xSafe)) != 0){
+        xSafe.releaseRewards();
         }
         uint256 mintAmount = getMintAmount(_amountIn);
         
@@ -899,8 +900,8 @@ contract xAtt is BEP20('xAtt', 'XATT') {
     }
     
     function burn(uint256 _amount) public {
-        if(att.balanceOf(xSafe) != 0){
-        IxSafe(xSafe).releaseRewards();
+        if(att.balanceOf(address(xSafe)) != 0){
+        xSafe.releaseRewards();
         }
         uint256 redeemAmount = getRedeemAmount(_amount);
         
