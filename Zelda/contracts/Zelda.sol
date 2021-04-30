@@ -26,6 +26,11 @@ contract Zelda is Ownable, Pausable {
         att = _att;
         counter = 1;
         MAX_POSITIONS = 5;
+        updateRewardScheme(1, 500);
+        updateRewardScheme(2, 200);
+        updateRewardScheme(3, 100);
+        updateRewardScheme(4, 100);
+        updateRewardScheme(5, 100);
     }
 
     event WinnerAnnouncement(address[] winners, uint256 indexed counter);
@@ -44,7 +49,7 @@ contract Zelda is Ownable, Pausable {
         whenNotPaused
     {
         require(_wList.length == MAX_POSITIONS, "ZELDA: MAX_POSITIONS");
-        for (uint256 i = 0; i < _wList.length; i++) {
+        for (uint256 i = 1; i <= MAX_POSITIONS; i++) {
             winners[counter][i] = _wList[i];
             userRewards[_wList[i]] = userRewards[_wList[i]].add(
                 rewardScheme[i]
@@ -88,10 +93,9 @@ contract Zelda is Ownable, Pausable {
         returns (address[] memory res)
     {
         res = new address[](MAX_POSITIONS);
-        for (uint256 i = 0; i < MAX_POSITIONS; i++) {
+        for (uint256 i = 1; i <= MAX_POSITIONS; i++) {
             res[i] = winners[_count][i];
         }
-        return res;
     }
 
     function updateRewardScheme(uint256 _position, uint256 _amount)
