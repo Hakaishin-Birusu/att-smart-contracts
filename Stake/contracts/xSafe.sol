@@ -58,7 +58,7 @@ contract xSafe is Ownable{
     }
 
     function _safeRelease(uint256 _amount) internal {
-        uint256 attBal = getSafeBalance();
+        uint256 attBal = getXsafeBalance();
         if (_amount > attBal) {
             att.safeTransfer(attPool, attBal);
         } else {
@@ -78,18 +78,18 @@ contract xSafe is Ownable{
         bal = xBal.mul(estimatedSupply).div(totalShares);
     }
 
-    function getSafeBalance() public view returns(uint256){
+    function getXsafeBalance() public view returns(uint256){
         return att.balanceOf(address(this));
     }
     
     function getEstimatedExchangeRate() public view returns (uint256 estimatedSupply, uint256 totalShares) {
-        totalShares = xAtt.totalSupply();
-        uint256 attBal = getSafeBalance();
+        totalShares = xattSupply();
+        uint256 attBal = getXsafeBalance();
         uint256 distribution = (block.number.sub(kLast)).mul(attPerBlock);
         if (distribution > attBal) {
             distribution = attBal;
         }
-        estimatedSupply = att.balanceOf(attPool).add(distribution);
+        estimatedSupply = (getAttPoolBalance()).add(distribution);
     }
 
     function toAtt(uint256 xAttAmount) external view returns (uint256 attAmount) {
@@ -101,4 +101,14 @@ contract xSafe is Ownable{
         (uint256 estimatedSupply,uint256 totalShares) = getEstimatedExchangeRate();
         xAttAmount = (attAmount.mul(totalShares)).div(estimatedSupply);
     }
+
+    function getAttPoolBalance() public view returns(uint256){
+        return att.balanceOf(attPool);
+    }
+
+    function xattSupply() public view returns(uint256){
+        return xAtt.totalSupply();
+    }
+
+
 }

@@ -26,11 +26,6 @@ contract Zelda is Ownable, Pausable {
         att = _att;
         counter = 1;
         MAX_POSITIONS = 5;
-        updateRewardScheme(1, 500);
-        updateRewardScheme(2, 200);
-        updateRewardScheme(3, 100);
-        updateRewardScheme(4, 100);
-        updateRewardScheme(5, 100);
     }
 
     event WinnerAnnouncement(address[] winners, uint256 indexed counter);
