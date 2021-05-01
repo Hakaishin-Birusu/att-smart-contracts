@@ -16,19 +16,22 @@ contract Zelda is Ownable, Pausable {
 
     IERC20 public att;
     uint256 public totalAllocation;
-    uint256 public counter;
-    uint256 public MAX_POSITIONS;
+    uint256 private counter;
+    uint256 private MAX_POSITIONS;
+    uint256 private coolDownPeriod;
+    uint256 public lastZeldaTimestampSec;
 
     // dayCount / position / address
-    mapping(uint256 => mapping(uint256 => address)) public winners;
-    mapping(address => uint256) public userRewards;
+    mapping(uint256 => mapping(uint256 => address)) private winners;
+    mapping(address => uint256) private userRewards;
     mapping(uint256 => uint256) public rewardScheme;
     mapping(address => bool) public nodes;
 
     constructor(IERC20 _att) public {
         att = _att;
-        counter = 1;
+        counter = 0;
         MAX_POSITIONS = 5;
+        coolDownPeriod = 1 days;
         rewardScheme[1] = 500000000000; //$500
         rewardScheme[2] = 200000000000; //$200
         rewardScheme[3] = 100000000000; //$100
@@ -56,14 +59,17 @@ contract Zelda is Ownable, Pausable {
         whenNotPaused
     {
         require(_wList.length == MAX_POSITIONS, "ZELDA: MAX_POSITIONS");
+        require(lastZeldaTimestampSec < now, "ZELDA: WAIT_FOR_COOLDOWN");
+        counter++;
         for (uint256 i = 1; i <= MAX_POSITIONS; i++) {
-            winners[counter][i] = _wList[i];
-            userRewards[_wList[i]] = userRewards[_wList[i]].add(
+            address cWinner = _wList[i-1];
+            winners[counter][i] = cWinner;
+            userRewards[cWinner] = userRewards[cWinner].add(
                 rewardScheme[i]
             );
             totalAllocation = totalAllocation.add((rewardScheme[i]));
         }
-        counter++;
+        lastZeldaTimestampSec = now.add(coolDownPeriod);
         emit WinnerAnnouncement(_wList, counter);
     }
 
@@ -144,7 +150,7 @@ contract Zelda is Ownable, Pausable {
     {
         res = new address[](MAX_POSITIONS);
         for (uint256 i = 1; i <= MAX_POSITIONS; i++) {
-            res[i] = winners[_count][i];
+            res[i-1] = winners[_count][i];
         }
     }
 

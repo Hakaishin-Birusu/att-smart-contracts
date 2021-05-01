@@ -1,0 +1,3 @@
+things we can do
+
+1. add a timer in adding winners

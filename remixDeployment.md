@@ -53,11 +53,14 @@ b. data - 0xfff6cae9
 
 # ZELDA deployment
 ```
+<check cool down period in constructor>
 1. Deployment contract 
     a. constrctor - attToken address 
-    b. testnet deployment - 0x201E4cCbd22Be5aD221B045F66192401CcB2F1e1
+    b. testnet deployment - 0x5E0E8b4DbE7F934E8712214c1CB93c442ce7F78b // 3 - 4 mins assumption time
 
 2. FILL some ATT for reward distribution
+
+3. SET NODE VIA stNode() function in zelda
 
 points - winners mapping can be private
 ```
