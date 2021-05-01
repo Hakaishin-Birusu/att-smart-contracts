@@ -107,6 +107,9 @@ points - winners mapping can be private
 
 # WATCHTOWNER Deployment
 ```
+1. deploy WatchTower contract 
+    a. constructor - added all the contracts  in the constractor call 
+    b. testnet deployment - 0x31835c6dd2130626a1BF65B521E4172522aFF324
 
 ```
 

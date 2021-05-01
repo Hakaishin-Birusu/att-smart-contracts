@@ -1,0 +1,573 @@
+[
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_zelda",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "_xsafe",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "_liquid",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "_pledge",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "_master",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "_oracle",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "_att",
+				"type": "address"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"inputs": [],
+		"name": "att",
+		"outputs": [
+			{
+				"internalType": "contract IAtt",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "currentWin",
+		"outputs": [
+			{
+				"components": [
+					{
+						"internalType": "address",
+						"name": "winnerAddress",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "claimAmount",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "position",
+						"type": "uint256"
+					},
+					{
+						"internalType": "bool",
+						"name": "hasPendingClaim",
+						"type": "bool"
+					}
+				],
+				"internalType": "struct WatchTower.winnerStruct[]",
+				"name": "winners",
+				"type": "tuple[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "currentZeldaCount",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "liquid",
+		"outputs": [
+			{
+				"internalType": "contract ILiquidFarm",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "master",
+		"outputs": [
+			{
+				"internalType": "contract IMaster",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "oracle",
+		"outputs": [
+			{
+				"internalType": "contract IOracle",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "pledge",
+		"outputs": [
+			{
+				"internalType": "contract IPledgeFarm",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "primaryStatsDash",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "totalAttLocked",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "totalBusdLocked",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "totalBnbAttLpLocked",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "oracleRate",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "targetPrice",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "circulatingSupply",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "stakeStats",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "supply",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "price",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "xSafeBalance",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "attLocked",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "statsDash",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "lastRebase",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "nextRebase",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_pid",
+				"type": "uint256"
+			}
+		],
+		"name": "statsLiquid",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "totalStaked",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "totalRewardLeft",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "resetblock",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_pid",
+				"type": "uint256"
+			}
+		],
+		"name": "statsPledge",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "totalStaked",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "totalRewardLeftAtt",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "totalRewardLeftBusd",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "endblock",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_user",
+				"type": "address"
+			}
+		],
+		"name": "userClaim",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "hasClaim",
+				"type": "bool"
+			},
+			{
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_user",
+				"type": "address"
+			}
+		],
+		"name": "userStake",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "bal",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "price",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "estimatedValue",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_pid",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "_user",
+				"type": "address"
+			}
+		],
+		"name": "userStakeLiquid",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "stake",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "balance",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_pid",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "_user",
+				"type": "address"
+			}
+		],
+		"name": "userStakePledge",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "stake",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "balance",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_user",
+				"type": "address"
+			}
+		],
+		"name": "userUnStake",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "xBal",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "price",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "estimatedValue",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_pid",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "_user",
+				"type": "address"
+			}
+		],
+		"name": "userUnstakeLiquid",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "stake",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "estReturn",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_pid",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "_user",
+				"type": "address"
+			}
+		],
+		"name": "userUnstakePledge",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "stake",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "estReturnAtt",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "estReturnBusd",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_count",
+				"type": "uint256"
+			}
+		],
+		"name": "winHistory",
+		"outputs": [
+			{
+				"components": [
+					{
+						"internalType": "address",
+						"name": "winnerAddress",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "claimAmount",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "position",
+						"type": "uint256"
+					},
+					{
+						"internalType": "bool",
+						"name": "hasPendingClaim",
+						"type": "bool"
+					}
+				],
+				"internalType": "struct WatchTower.winnerStruct[]",
+				"name": "winners",
+				"type": "tuple[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "xsafe",
+		"outputs": [
+			{
+				"internalType": "contract IXsafe",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "zelda",
+		"outputs": [
+			{
+				"internalType": "contract IZelda",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
+]
