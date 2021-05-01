@@ -82,16 +82,32 @@ points - winners mapping can be private
 
 # FARM DEPLOYMENT
 
-```
 # LIQUID FARM
 ```
+1. deploy liquid farm contract 
+    a. constructor - attToken address , att token per block, start block , end block 
+    b. testnet deployment - 0xe7a2861EAF22F8f0E9161d73E581D923Ea159284
 
+2. Add LP token pool via "add()"
+
+3. FILL some ATT for reward distribution in LiquidFarm contract
 ```
+
 # PLEDGE FARM 
 ```
+1. deploy Pledge farm contract 
+    a. constructor - attToken address, busdtoken address , att token per block, busd token per block, start block , end block 
+    b. testnet deployment - 0x465c9C9790E609332A94a8A494034459cE81A21B
+
+2. 2. Add LP token pool via "add()"
+
+3. FILL some ATT  & BUSD for reward distribution in Pledge contract
+```
+
 
 # WATCHTOWNER Deployment
 ```
+
 ```
 
 

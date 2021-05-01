@@ -8,9 +8,7 @@ import "@openzeppelin/contracts/utils/EnumerableSet.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-
 contract PledgeFarm is Ownable {
-    
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
@@ -167,7 +165,7 @@ contract PledgeFarm is Ownable {
      * @param _amount Amount of LP tokens to deposit.
      */
     function deposit(uint256 _pid, uint256 _amount) public {
-        require(_amount <= userLpBalance(_pid, msg.sender), "INSUFFICIENT_BALANCE");
+        require(_amount <= userLpBalance(_pid, msg.sender), "insufficient balance");
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
         updatePool(_pid);
@@ -184,6 +182,11 @@ contract PledgeFarm is Ownable {
         emit Deposit(msg.sender, _pid, _amount);
     }
 
+    /**
+     * @dev Returns deposited LP tokens 
+     * @param _pid ID of a specific LP token pool. See index of PoolInfo[].
+     * @param _user wallet address of specific user.
+     */
     function userLpBalance(uint256 _pid, address _user ) public view returns(uint256){
         PoolInfo storage pool = poolInfo[_pid];
         return pool.lpToken.balanceOf(_user);
@@ -195,7 +198,7 @@ contract PledgeFarm is Ownable {
      * @param _amount Amount of LP tokens to withdraw.
      */
     function withdraw(uint256 _pid, uint256 _amount) public {
-        require(block.number > endBlock, "underbounds");
+        require(block.number > endBlock, "Can't withdraw, wait for farming end");
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
         require(user.amount >= _amount, "Can't withdraw more token than previously deposited.");
@@ -239,6 +242,11 @@ contract PledgeFarm is Ownable {
         }
     }
 
+    /**
+     * @dev Safe BUSD transfer function, just in case if rounding error causes faucet to not have enough BUSD.
+     * @param _to Target address.
+     * @param _amount Amount of BUSD to transfer.
+     */
     function safeBusdTransfer(address _to, uint256 _amount) internal {
         uint256 busdBalance = BUSD.balanceOf(address(this));
         if (_amount > busdBalance) {
@@ -264,6 +272,10 @@ contract PledgeFarm is Ownable {
         return ATT.balanceOf(address(this));
     }
 
+    /**
+     * @dev Views total number of BUSD tokens deposited for rewards.
+     * @return BUSD token balance of the faucet.
+     */
     function balanceBusd() public view returns (uint256) {
         return BUSD.balanceOf(address(this));
     }
@@ -272,7 +284,6 @@ contract PledgeFarm is Ownable {
      * @dev Rescue reward tokens.
      */
     function rescueTokens(address to, uint256 value0, uint256 value1) external onlyOwner  {
-        require(block.number > endBlock, "underbounds");
          ATT.transfer(to, value0);
          BUSD.transfer(to, value1);
     }

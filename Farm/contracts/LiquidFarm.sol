@@ -8,9 +8,7 @@ import "@openzeppelin/contracts/utils/EnumerableSet.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-
 contract LiquidFarm is Ownable {
-    
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
@@ -102,7 +100,7 @@ contract LiquidFarm is Ownable {
      * @dev View function to see pending ATT on frontend.
      * @param _pid ID of a specific LP token pool. See index of PoolInfo[].
      * @param _user Address of a specific user.
-     * @return Pending ATT.
+     * @return User deposit & Pending ATT.
      */
     function pendingAtt(uint256 _pid, address _user) external view returns (uint256, uint256) {
         PoolInfo storage pool = poolInfo[_pid];
@@ -167,6 +165,11 @@ contract LiquidFarm is Ownable {
         emit Deposit(msg.sender, _pid, _amount);
     }
 
+    /**
+     * @dev Returns deposited LP tokens 
+     * @param _pid ID of a specific LP token pool. See index of PoolInfo[].
+     * @param _user wallet address of specific user.
+     */
     function userLpBalance(uint256 _pid, address _user ) public view returns(uint256){
         PoolInfo storage pool = poolInfo[_pid];
         return pool.lpToken.balanceOf(_user);
@@ -242,7 +245,7 @@ contract LiquidFarm is Ownable {
     }
 
     /**
-     * @dev Define last block on which ATT reward distribution occurs.
+     * @dev Defines New last block on which ATT reward distribution occurs.
      * @return Last block number.
      */
     function rewardBlockExtension(uint256 _endBlock) external onlyOwner returns (uint256) {
