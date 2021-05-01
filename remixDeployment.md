@@ -97,6 +97,8 @@ points - winners mapping can be private
 2. Add LP token pool via "add()"
 
 3. FILL some ATT for reward distribution in LiquidFarm contract
+
+<NOTE - WHILE DEPOSIT of LP REMEBER TO CHECK ALLOWANCE IN LP token contract >
 ```
 
 # PLEDGE FARM 
@@ -108,6 +110,8 @@ points - winners mapping can be private
 2. 2. Add LP token pool via "add()"
 
 3. FILL some ATT  & BUSD for reward distribution in Pledge contract
+
+<testcase - tet withdraw , once the endblock reaches>
 ```
 
 
@@ -115,7 +119,7 @@ points - winners mapping can be private
 ```
 1. deploy WatchTower contract 
     a. constructor - added all the contracts  in the constractor call 
-    b. testnet deployment - 0x31835c6dd2130626a1BF65B521E4172522aFF324
+    b. testnet deployment - 0xC6E203EF24F3b42FC9d054A221Bd23e52Ab60deD
 
 ```
 
