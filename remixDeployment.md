@@ -62,6 +62,39 @@ b. data - 0xfff6cae9
 points - winners mapping can be private
 ```
 
+# STAKE (XATT) deployment
+```
+1. deploy xsafe contract
+    a. constructor - attTOken address & tokensPerBlock value
+    b. testnet deployment - 0x1C3Fc638d64D7202cB003FFBf23fBC0addA0881a
+
+2. deploy xatt contract
+    a. constructor - attTOken address & xSafe Address
+    b. testnet deployment - 0xCAf86b877127f5840284065DD114f101B7f92DE3
+    c. spawned pool address - 0x191C2764E1F7E9C390116F3dd71dD36772d3f3Bb
+
+3. UPDATE functions in xSafe
+    a. setAttPool()
+    b. setXAtt()
+
+4. FILL some ATT for reward distribution in xSafe
+```
+
+# FARM DEPLOYMENT
+
+```
+# LIQUID FARM
+```
+
+```
+# PLEDGE FARM 
+```
+
+# WATCHTOWNER Deployment
+```
+```
+
+
 
 ## If in middle transfer privillede is to be given use <IN ATT.sol  => "enableTransfer()">
 

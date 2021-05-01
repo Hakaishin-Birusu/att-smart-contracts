@@ -10,7 +10,6 @@ import "@openzeppelin/contracts/utils/Pausable.sol";
 /**
  * @title Zelda lottery contract
  */
-
 contract Zelda is Ownable, Pausable {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
@@ -148,7 +147,6 @@ contract Zelda is Ownable, Pausable {
             res[i] = winners[_count][i];
         }
     }
-
 
     /**
      * @dev EMERGENCY ONLY. Withdraw ATT amount from zelda. 
