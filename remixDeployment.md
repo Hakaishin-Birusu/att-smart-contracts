@@ -51,6 +51,18 @@ b. data - 0xfff6cae9
 ```
 
 
+# ZELDA deployment
+```
+1. Deployment contract 
+    a. constrctor - attToken address 
+    b. testnet deployment - 0x201E4cCbd22Be5aD221B045F66192401CcB2F1e1
+
+2. FILL some ATT for reward distribution
+
+points - winners mapping can be private
+```
+
+
 ## If in middle transfer privillede is to be given use <IN ATT.sol  => "enableTransfer()">
 
 ## AFTER SALE <IN ATT.sol  => "setInitialDistributionFinished()">

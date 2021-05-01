@@ -7,6 +7,10 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Pausable.sol";
 
+/**
+ * @title Zelda lottery contract
+ */
+
 contract Zelda is Ownable, Pausable {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
@@ -26,11 +30,15 @@ contract Zelda is Ownable, Pausable {
         att = _att;
         counter = 1;
         MAX_POSITIONS = 5;
+        rewardScheme[1] = 500000000000; //$500
+        rewardScheme[2] = 200000000000; //$200
+        rewardScheme[3] = 100000000000; //$100
+        rewardScheme[4] = 100000000000; //$100
+        rewardScheme[5] = 100000000000; //$100
     }
 
     event WinnerAnnouncement(address[] winners, uint256 indexed counter);
-    event UserClaim(address indexed user, uint256 amount);
-    event EmergencyWithdraw(address indexed user, uint256 amount);
+    event Claim(address indexed user, uint256 amount);
     event RewardSchemeUpdate(uint256 indexed position, uint256 amount);
 
     modifier onlyNode() {
@@ -38,6 +46,11 @@ contract Zelda is Ownable, Pausable {
         _;
     }
 
+  /**
+     * @dev Notifies Zelda daily lottery winners.
+     * Can only be called by trusted nodes.
+     * @param _wList List of winners.
+     */
     function announceWinner(address[] memory _wList)
         external
         onlyNode
@@ -55,33 +68,76 @@ contract Zelda is Ownable, Pausable {
         emit WinnerAnnouncement(_wList, counter);
     }
 
+  /**
+     * @dev Transfers user win amount.
+     */
     function claim() external whenNotPaused {
-        uint256 claimAmount = userRewards[msg.sender];
+        uint256 claimAmount = userRewards[msg.sender]; // gas optimization
         require(claimAmount > 0, "ZELDA : NO_CLAIM");
         userRewards[msg.sender] = 0;
         totalAllocation = totalAllocation.sub(claimAmount);
-        att.safeTransfer(msg.sender, claimAmount);
-        emit UserClaim(msg.sender, claimAmount);
+        safeAttTransfer(msg.sender, claimAmount);
     }
 
+     function safeAttTransfer(address _to, uint256 _amount) internal {
+        uint256 Bal = balance();
+        if (_amount > Bal) {
+            _amount = Bal;
+        }
+        att.transfer(_to, _amount);
+        emit Claim(_to,_amount);
+    }
+
+    /**
+     * @dev Sets nodes status.
+     * @param _node node address.
+     * @param _status node status.
+     */
+    function setNode(address _node, bool _status) external onlyOwner {
+        nodes[_node] = _status;
+    }
+
+    /**
+     * @dev Updates reward allocation on specific position.
+     * @param _position position on which reward is updated.
+     * @param _amount new amount.
+     */
+    function updateRewardScheme(uint256 _position, uint256 _amount)
+        external
+        onlyOwner
+        whenPaused
+    {
+        rewardScheme[_position] = _amount;
+        emit RewardSchemeUpdate(_position, _amount);
+    }
+
+
+  /**
+     * @dev Returns ATT balance of zelda.
+     */
+    function balance() public view returns (uint256) {
+        return att.balanceOf(address(this));
+    }
+
+  /**
+     * @dev Returns user's claimable ATT balance.
+     * @param _who user's wallet address.
+     */
     function pendingReward(address _who) public view returns (uint256) {
         return userRewards[_who];
     }
 
-    // EMERGENCY ONLY.
-    function emergencyWithdraw(uint256 _amount) external onlyOwner whenPaused {
-        att.safeTransfer(address(msg.sender), _amount);
-        emit EmergencyWithdraw(msg.sender, _amount);
-    }
-
-    function setNodeStatus(address _node, bool _status) external onlyOwner {
-        nodes[_node] = _status;
-    }
-
+  /**
+     * @dev Returns last zelda announcement count.
+     */
     function getCurrentCounter() external view returns (uint256) {
         return counter;
     }
 
+  /**
+     * @dev Returns zelda winners.
+     * @param _count zelda announcement count.
+     */
     function getWinners(uint256 _count)
         external
         view
@@ -93,25 +149,25 @@ contract Zelda is Ownable, Pausable {
         }
     }
 
-    function updateRewardScheme(uint256 _position, uint256 _amount)
-        external
-        onlyOwner
-        whenPaused
-    {
-        rewardScheme[_position] = _amount;
-        emit RewardSchemeUpdate(_position, _amount);
+
+    /**
+     * @dev EMERGENCY ONLY. Withdraw ATT amount from zelda. 
+     * @param _amount amount to be withdrawn.
+     */
+    function emergencyWithdraw(uint256 _amount) external onlyOwner whenPaused {
+        safeAttTransfer(address(msg.sender), _amount);
     }
 
-    function balance() public view returns (uint256) {
-        return att.balanceOf(address(this));
-    }
-
-    // pause & unpause
-
+  /**
+     * @dev Pause zelda state
+     */
     function pause() external onlyOwner {
         _pause();
     }
 
+    /**
+     * @dev Unpause zelda state
+     */
     function unPause() external onlyOwner {
         _unpause();
     }
