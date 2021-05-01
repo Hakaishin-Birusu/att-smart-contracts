@@ -304,12 +304,12 @@ contract Ownable {
 
 
 /**
- * @title Att ERC20 token
+ * @title ATT ERC20 token
  * @dev  
- *      The goal of Att is to maintain a stable price of 1$.
+ *      The goal of ATT is to maintain a stable price of 1$.
  *      Based on the Ampleforth protocol.
  */
-contract Att is ERC20Detailed, Ownable {
+contract ATT is ERC20Detailed, Ownable {
     using SafeMath for uint256;
     using SafeMathInt for int256;
 
@@ -391,7 +391,7 @@ contract Att is ERC20Detailed, Ownable {
     }
 
     constructor()
-        ERC20Detailed("Att", "ATT", uint8(DECIMALS))
+        ERC20Detailed("ATT", "ATT", uint8(DECIMALS))
         public
     {
         _totalSupply = INITIAL_FRAGMENTS_SUPPLY;

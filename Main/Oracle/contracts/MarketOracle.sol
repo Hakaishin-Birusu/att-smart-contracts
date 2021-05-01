@@ -427,8 +427,8 @@ contract MarketOracle is Ownable {
     uint private wbnbBusdPrice1CumulativeLast;
     uint32 private wbnbBusdBlockTimestampLast;
 
-    address private constant _wbnb = 0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c;
-    address private constant _busd = 0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56;
+    address private constant _wbnb = 0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd;
+    address private constant _busd = 0xd5e0B2Ec09F651D201c1Ab19122678721A2ecfA5;
 
     IUniswapV2Pair private _att_bnb;
     IUniswapV2Pair private _wbnb_busd;

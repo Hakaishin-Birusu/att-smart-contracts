@@ -27,15 +27,15 @@
     "absolutePath": "/home/sagar/Desktop/projects/ATT/smart-contracts/WatchTower/contracts/interfaces/IOracle.sol",
     "exportedSymbols": {
       "IOracle": [
-        744
+        728
       ]
     },
-    "id": 745,
+    "id": 729,
     "license": "GPL-3.0",
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 738,
+        "id": 722,
         "literals": [
           "solidity",
           ">=",
@@ -52,9 +52,9 @@
         "contractKind": "interface",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 744,
+        "id": 728,
         "linearizedBaseContracts": [
-          744
+          728
         ],
         "name": "IOracle",
         "nodeType": "ContractDefinition",
@@ -63,7 +63,7 @@
             "body": null,
             "documentation": null,
             "functionSelector": "3bc5de30",
-            "id": 743,
+            "id": 727,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
@@ -71,23 +71,23 @@
             "nodeType": "FunctionDefinition",
             "overrides": null,
             "parameters": {
-              "id": 739,
+              "id": 723,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "103:2:5"
             },
             "returnParameters": {
-              "id": 742,
+              "id": 726,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 741,
+                  "id": 725,
                   "mutability": "mutable",
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
-                  "scope": 743,
+                  "scope": 727,
                   "src": "129:7:5",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -96,7 +96,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 740,
+                    "id": 724,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "129:7:5",
@@ -111,14 +111,14 @@
               ],
               "src": "128:9:5"
             },
-            "scope": 744,
+            "scope": 728,
             "src": "87:51:5",
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
           }
         ],
-        "scope": 745,
+        "scope": 729,
         "src": "63:77:5"
       }
     ],
@@ -128,15 +128,15 @@
     "absolutePath": "/home/sagar/Desktop/projects/ATT/smart-contracts/WatchTower/contracts/interfaces/IOracle.sol",
     "exportedSymbols": {
       "IOracle": [
-        744
+        728
       ]
     },
-    "id": 745,
+    "id": 729,
     "license": "GPL-3.0",
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 738,
+        "id": 722,
         "literals": [
           "solidity",
           ">=",
@@ -153,9 +153,9 @@
         "contractKind": "interface",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 744,
+        "id": 728,
         "linearizedBaseContracts": [
-          744
+          728
         ],
         "name": "IOracle",
         "nodeType": "ContractDefinition",
@@ -164,7 +164,7 @@
             "body": null,
             "documentation": null,
             "functionSelector": "3bc5de30",
-            "id": 743,
+            "id": 727,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
@@ -172,23 +172,23 @@
             "nodeType": "FunctionDefinition",
             "overrides": null,
             "parameters": {
-              "id": 739,
+              "id": 723,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "103:2:5"
             },
             "returnParameters": {
-              "id": 742,
+              "id": 726,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 741,
+                  "id": 725,
                   "mutability": "mutable",
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
-                  "scope": 743,
+                  "scope": 727,
                   "src": "129:7:5",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -197,7 +197,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 740,
+                    "id": 724,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "129:7:5",
@@ -212,14 +212,14 @@
               ],
               "src": "128:9:5"
             },
-            "scope": 744,
+            "scope": 728,
             "src": "87:51:5",
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
           }
         ],
-        "scope": 745,
+        "scope": 729,
         "src": "63:77:5"
       }
     ],
@@ -231,7 +231,7 @@
   },
   "networks": {},
   "schemaVersion": "3.3.2",
-  "updatedAt": "2021-04-30T17:38:17.859Z",
+  "updatedAt": "2021-05-01T08:00:03.353Z",
   "devdoc": {
     "kind": "dev",
     "methods": {},

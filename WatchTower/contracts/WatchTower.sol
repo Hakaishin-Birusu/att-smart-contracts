@@ -47,13 +47,13 @@ contract WatchTower {
         att = IAtt(_att);
     }
 
-    function getCurrentBlock() public view returns (uint256) {
-        return block.number;
-    }
+    // function getCurrentBlock() public view returns (uint256) {
+    //     return block.number;
+    // }
 
-    function getCurrentTimestamp() public view returns (uint256) {
-        return block.timestamp;
-    }
+    // function getCurrentTimestamp() public view returns (uint256) {
+    //     return block.timestamp;
+    // }
 
     function userClaim(address _user) public view returns(bool hasClaim, uint256 amount){
         amount = zelda.pendingReward(_user);
@@ -99,7 +99,7 @@ contract WatchTower {
        supply = xsafe.xattSupply();
        price = xsafe.toAtt(1);
        xSafeBalance = xsafe.getXsafeBalance();
-       attLocked = xsafe.getAttPoolBalance();
+       attLocked = xsafe.getAttPoolBalance() + xSafeBalance;
     }
 
     function userUnstakeLiquid(uint256 _pid, address _user) public view returns(uint256 stake, uint256 estReturn){
