@@ -25,13 +25,17 @@ contract xSafe is Ownable{
     constructor(IERC20 _att, uint256 _attPerBlock) public {
         att = _att;
         attPerBlock = _attPerBlock;
+        kLast = 0;
     }
 
     /**
      * @dev Release reward as per the blocks passed.
      */
     function releaseRewards() external {
-        if (kLast != 0 && kLast < block.number) {
+        if (kLast == 0){
+            kLast = block.number;   // start reward block from first deposit
+        } 
+        else if(kLast < block.number) {
             uint256 amount = block.number.sub(kLast).mul(attPerBlock);
             kLast = block.number;
             safeTransfer(attPool, amount);

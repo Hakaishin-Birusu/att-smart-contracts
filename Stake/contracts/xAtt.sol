@@ -862,7 +862,7 @@ interface IxSafe {
   It also allows for easier integration with staking and yield farming dapps.
 */
 
-contract xAtt is BEP20('xAtt', 'XATT') {
+contract xATT is BEP20('xATT', 'xATT') {
     
     BEP20 public att ;
     TokenPool public attPool;

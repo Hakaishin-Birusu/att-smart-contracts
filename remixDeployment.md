@@ -69,18 +69,21 @@ points - winners mapping can be private
 ```
 1. deploy xsafe contract
     a. constructor - attTOken address & tokensPerBlock value
-    b. testnet deployment - 0x1C3Fc638d64D7202cB003FFBf23fBC0addA0881a
+    b. testnet deployment - 0xEa312E36aD9DB2ed734364497Ab735f650D1C9C3
 
 2. deploy xatt contract
     a. constructor - attTOken address & xSafe Address
-    b. testnet deployment - 0xCAf86b877127f5840284065DD114f101B7f92DE3
-    c. spawned pool address - 0x191C2764E1F7E9C390116F3dd71dD36772d3f3Bb
+    b. testnet deployment - 0x80aa3D8D79c8D1350a2D1FfDE57313C6A080dC2C
+    c. spawned pool address - 0xF07C53e49Cfbe28f0AD12d33541518F29a2eCc91
+
 
 3. UPDATE functions in xSafe
     a. setAttPool()
     b. setXAtt()
 
 4. FILL some ATT for reward distribution in xSafe
+
+<NOTE - WHILE MINTING XATT REMEBER TO CHECK ALLOWANCE IN ATT >
 ```
 
 # FARM DEPLOYMENT
