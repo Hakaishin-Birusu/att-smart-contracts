@@ -1,3 +1,17 @@
-things we can do
+things to do -
 
-1. add a timer in adding winners
+1. sc update 
+	a. att token , max 1% deflation
+	b. all , update as per fe needs 
+	c. pledge farm , direct complete withdrawal
+
+2. api - 
+	a. merge api calls and single call update in fe
+	b. check for data integrity
+	c. complete , apy, tvl , etc calls
+	
+3. FE - 
+	a. integrate cool down timer
+	
+4. create service to randomly choose zelda winners
+	

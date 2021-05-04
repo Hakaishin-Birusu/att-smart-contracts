@@ -85,19 +85,19 @@ contract WatchTower {
 
     function userUnStake(address _user) public view returns (uint256 xBal, uint256 price, uint256 estimatedValue){
        (xBal, ) = xsafe.getUserStat(_user);
-       price = xsafe.toAtt(1);
-       estimatedValue = xBal*price;
+       price = xsafe.toAtt(1000000000000000000);
+       estimatedValue = xsafe.toAtt(xBal);
     }
 
     function userStake(address _user) public view returns (uint256 bal, uint256 price, uint256 estimatedValue){
        (, bal ) = xsafe.getUserStat(_user);
-       price = xsafe.toXAtt(1);
-       estimatedValue = bal*price;
+       price = xsafe.toXAtt(1000000000);
+       estimatedValue = xsafe.toXAtt(bal);
     }
 
     function stakeStats() public view returns (uint256 supply, uint256 price, uint256 xSafeBalance, uint256 attLocked){
        supply = xsafe.xattSupply();
-       price = xsafe.toAtt(1);
+       price = xsafe.toAtt(1000000000000000000);
        xSafeBalance = xsafe.getXsafeBalance();
        attLocked = xsafe.getAttPoolBalance() + xSafeBalance;
     }
